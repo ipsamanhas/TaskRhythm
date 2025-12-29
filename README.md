@@ -7,7 +7,7 @@ TaskRhythm is a human-centered productivity web application that helps students 
 - **Energy-Based Scheduling**: Define your daily energy windows (high, medium, low) to match your natural rhythm
 - **Smart Task Assignment**: Automatically assigns tasks to appropriate energy windows using deterministic logic
 - **Compassionate Design**: Guilt-free, non-judgmental interface with supportive messaging
-- **No Tracking**: No surveillance or productivity metrics—just support for your natural patterns
+- **Privacy-First Design**: No surveillance, productivity scoring, or behavioral analytics—only the data required to generate schedules
 - **Academic Focus**: Built specifically for students managing coursework and deadlines
 
 ## 🎯 Core Concept
