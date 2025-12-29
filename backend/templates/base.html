@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TaskRhythm{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-brand">TaskRhythm</a>
+            {% if request.session.get('user_id') %}
+            <div class="nav-links">
+                <a href="/dashboard">Dashboard</a>
+                <a href="/energy">Energy Windows</a>
+                <a href="/tasks">Tasks</a>
+                <a href="/schedule">Schedule</a>
+                <form action="/auth/logout" method="post" style="display: inline;">
+                    <button type="submit" class="btn-link">Logout</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <p>TaskRhythm - Work with your energy, not against it.</p>
+    </footer>
+
+    <!-- Custom Confirmation Modal -->
+    <div id="customModal" class="custom-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Confirm Action</h3>
+                <p class="modal-message" id="modalMessage">Are you sure?</p>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="modal-btn modal-btn-cancel" onclick="cancelModal()">Cancel</button>
+                <button type="button" class="modal-btn modal-btn-confirm" onclick="confirmModal()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/main.js?v=2"></script>
+</body>
+</html>
+

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - TaskRhythm{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>Welcome to TaskRhythm</h1>
+    <p class="tagline">Schedule tasks based on your natural energy, not rigid time blocks</p>
+</div>
+
+{% if logged_in %}
+    <div class="card">
+        <h2>Welcome back!</h2>
+        <p>You're already logged in.</p>
+        <a href="/dashboard" class="btn btn-primary">Go to Dashboard</a>
+    </div>
+{% else %}
+    <div class="auth-container">
+        <div class="card">
+            <h2>Login</h2>
+            
+            {% if request.query_params.get('error') %}
+            <div class="alert alert-error">{{ request.query_params.get('error') }}</div>
+            {% endif %}
+            
+            <form action="/auth/login" method="post" class="form">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+            
+            <p class="text-center" style="margin-top: 1rem;">
+                Don't have an account? <a href="/register">Register here</a>
+            </p>
+        </div>
+    </div>
+{% endif %}
+
+<div class="features">
+    <div class="feature-card">
+        <h3>🌅 Natural Energy</h3>
+        <p>Define when you feel most alert and when you need rest</p>
+    </div>
+    
+    <div class="feature-card">
+        <h3>📚 Smart Tasks</h3>
+        <p>Label tasks by effort level, not arbitrary time blocks</p>
+    </div>
+    
+    <div class="feature-card">
+        <h3>🎯 Auto-Schedule</h3>
+        <p>Let the system match tasks to your energy windows</p>
+    </div>
+    
+    <div class="feature-card">
+        <h3>💙 Compassionate</h3>
+        <p>No guilt, no tracking, just support for your natural rhythm</p>
+    </div>
+</div>
+{% endblock %}
+

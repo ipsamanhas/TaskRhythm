@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Tasks - TaskRhythm{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Your Tasks</h1>
+    <p>Add academic tasks and label them by effort level</p>
+</div>
+
+{% if request.query_params.get('error') %}
+<div class="alert alert-error">{{ request.query_params.get('error') }}</div>
+{% endif %}
+
+<div class="content-grid">
+    <div class="card">
+        <h2>Add New Task</h2>
+        <p class="help-text">How much effort will this task require?</p>
+        
+        <form action="/tasks/create" method="post" class="form">
+            <div class="form-group">
+                <label for="title">Task Title</label>
+                <input type="text" id="title" name="title" required maxlength="200" placeholder="e.g., Study for CMPUT 301 midterm">
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description (optional)</label>
+                <textarea id="description" name="description" rows="3" placeholder="Any additional details..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="effort_level">Effort Level</label>
+                <select id="effort_level" name="effort_level" required>
+                    <option value="high">🔴 High - Deep focus required</option>
+                    <option value="medium">🟡 Medium - Moderate attention</option>
+                    <option value="low">🟢 Low - Light or routine work</option>
+                </select>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="estimated_duration">Duration (minutes)</label>
+                    <input type="number" id="estimated_duration" name="estimated_duration" min="1" placeholder="60">
+                </div>
+                
+                <div class="form-group">
+                    <label for="deadline">Deadline (optional)</label>
+                    <input type="date" id="deadline" name="deadline">
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Add Task</button>
+        </form>
+    </div>
+    
+    <div class="tasks-list">
+        <h2>Your Tasks</h2>
+        
+        {% if tasks %}
+        <div class="task-cards">
+            {% for task in tasks %}
+            <div class="task-card {% if task.is_completed %}completed{% endif %} effort-{{ task.effort_level }}">
+                <div class="task-header">
+                    <h3>{{ task.title }}</h3>
+                    <span class="effort-badge effort-{{ task.effort_level }}">
+                        {% if task.effort_level == 'high' %}🔴 High
+                        {% elif task.effort_level == 'medium' %}🟡 Medium
+                        {% else %}🟢 Low{% endif %}
+                    </span>
+                </div>
+                
+                {% if task.description %}
+                <p class="task-description">{{ task.description }}</p>
+                {% endif %}
+                
+                <div class="task-meta">
+                    {% if task.estimated_duration %}
+                    <span>⏱️ {{ task.estimated_duration }} min</span>
+                    {% endif %}
+                    
+                    {% if task.deadline %}
+                    <span>📅 Due: {{ task.deadline.strftime('%b %d, %Y') }}</span>
+                    {% endif %}
+                    
+                    {% if task.assigned_window_id %}
+                    <span>✅ Scheduled</span>
+                    {% endif %}
+                </div>
+                
+                <div class="task-actions">
+                    <form action="/tasks/{{ task.id }}/complete" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-small">
+                            {% if task.is_completed %}Undo{% else %}Complete{% endif %}
+                        </button>
+                    </form>
+                    
+                    <form action="/tasks/{{ task.id }}/delete" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-danger btn-small" data-confirm="Are you sure you want to delete this task?" data-confirm-title="Delete Task">Delete</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>No tasks yet. Add your first task to get started!</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="info-box">
+    <h3>💡 Tips for Labeling Tasks</h3>
+    <ul>
+        <li><strong>High effort:</strong> Complex problem-solving, deep research, writing essays, studying new concepts</li>
+        <li><strong>Medium effort:</strong> Practice problems, reading assignments, note-taking, group work</li>
+        <li><strong>Low effort:</strong> Reviewing notes, organizing files, light reading, administrative tasks</li>
+        <li><strong>Be realistic:</strong> You can adjust later if you misjudge the effort level</li>
+    </ul>
+</div>
+{% endblock %}
+

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Energy Windows - TaskRhythm{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Your Energy Windows</h1>
+    <p>Define when you feel high, medium, or low energy throughout your week</p>
+</div>
+
+{% if request.query_params.get('error') %}
+<div class="alert alert-error">{{ request.query_params.get('error') }}</div>
+{% endif %}
+
+<div class="content-grid">
+    <div class="card">
+        <h2>Add Energy Window</h2>
+        <p class="help-text">Listen to your body. When do you naturally feel most alert? When do you need rest?</p>
+        
+        <form action="/energy/windows" method="post" class="form">
+            <div class="form-group">
+                <label for="day_of_week">Day of Week</label>
+                <select id="day_of_week" name="day_of_week" required>
+                    {% for day in days %}
+                    <option value="{{ day }}">{{ day }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="time_start">Start Time</label>
+                    <input type="time" id="time_start" name="time_start" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="time_end">End Time</label>
+                    <input type="time" id="time_end" name="time_end" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="energy_level">Energy Level</label>
+                <select id="energy_level" name="energy_level" required>
+                    <option value="high">🔥 High - Alert and focused</option>
+                    <option value="medium">⚡ Medium - Steady energy</option>
+                    <option value="low">🌙 Low - Need rest or light tasks</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Add Window</button>
+        </form>
+    </div>
+    
+    <div class="windows-list">
+        <h2>Current Windows</h2>
+        
+        {% if windows %}
+        <div class="window-cards">
+            {% for window in windows %}
+            <div class="window-card energy-{{ window.energy_level }}">
+                <div class="window-info">
+                    <h3>{{ window.day_of_week }}</h3>
+                    <p class="window-time">
+                        {{ window.time_start.strftime('%I:%M %p') }} - {{ window.time_end.strftime('%I:%M %p') }}
+                    </p>
+                    <span class="energy-badge energy-{{ window.energy_level }}">
+                        {% if window.energy_level == 'high' %}🔥 High Energy
+                        {% elif window.energy_level == 'medium' %}⚡ Medium Energy
+                        {% else %}🌙 Low Energy{% endif %}
+                    </span>
+                </div>
+                <form action="/energy/windows/{{ window.id }}/delete" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-danger btn-small" data-confirm="Are you sure you want to delete this energy window?" data-confirm-title="Delete Window">Delete</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>No energy windows defined yet. Add your first window to get started!</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="info-box">
+    <h3>💡 Tips for Defining Energy Windows</h3>
+    <ul>
+        <li><strong>Be honest:</strong> Your natural rhythm is unique. Don't force yourself into someone else's schedule.</li>
+        <li><strong>Consider patterns:</strong> Most people have 2-3 high-energy windows per day.</li>
+        <li><strong>Honor low energy:</strong> Low-energy windows are just as important as high-energy ones.</li>
+        <li><strong>Start simple:</strong> You can always adjust later as you learn your patterns.</li>
+    </ul>
+</div>
+{% endblock %}
+

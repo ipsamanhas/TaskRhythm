@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Schedule - TaskRhythm{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Your Schedule</h1>
+    <p>Tasks matched to your energy windows</p>
+</div>
+
+{% if request.query_params.get('success') %}
+<div class="alert alert-success">{{ request.query_params.get('success') }}</div>
+{% endif %}
+
+{% if request.query_params.get('error') %}
+<div class="alert alert-error">{{ request.query_params.get('error') }}</div>
+{% endif %}
+
+{% if message %}
+<div class="alert alert-{{ message_type }}">{{ message }}</div>
+{% endif %}
+
+<div class="schedule-actions">
+    <form action="/schedule/generate" method="post" style="display: inline;">
+        <button type="submit" class="btn btn-primary">Generate Schedule</button>
+    </form>
+    
+    <form action="/schedule/clear" method="post" style="display: inline;">
+        <button type="submit" class="btn btn-secondary" data-confirm="Clear all task assignments?" data-confirm-title="Clear Schedule">Clear Schedule</button>
+    </form>
+</div>
+
+<div class="schedule-container">
+    {% if windows %}
+        {% for window in windows %}
+        <div class="schedule-window energy-{{ window.energy_level }}">
+            <div class="window-header">
+                <h3>{{ window.day_of_week }}</h3>
+                <p class="window-time">
+                    {{ window.time_start.strftime('%I:%M %p') }} - {{ window.time_end.strftime('%I:%M %p') }}
+                </p>
+                <span class="energy-badge energy-{{ window.energy_level }}">
+                    {% if window.energy_level == 'high' %}🔥 High Energy
+                    {% elif window.energy_level == 'medium' %}⚡ Medium Energy
+                    {% else %}🌙 Low Energy{% endif %}
+                </span>
+            </div>
+            
+            <div class="window-tasks">
+                {% if window.id in tasks_by_window and tasks_by_window[window.id] %}
+                    {% for task in tasks_by_window[window.id] %}
+                    <div class="scheduled-task effort-{{ task.effort_level }}">
+                        <div class="task-content">
+                            <h4>{{ task.title }}</h4>
+                            {% if task.description %}
+                            <p class="task-description">{{ task.description }}</p>
+                            {% endif %}
+                            <div class="task-meta">
+                                <span class="effort-badge effort-{{ task.effort_level }}">
+                                    {% if task.effort_level == 'high' %}🔴 High
+                                    {% elif task.effort_level == 'medium' %}🟡 Medium
+                                    {% else %}🟢 Low{% endif %}
+                                </span>
+                                {% if task.estimated_duration %}
+                                <span>⏱️ {{ task.estimated_duration }} min</span>
+                                {% endif %}
+                                {% if task.deadline %}
+                                <span>📅 {{ task.deadline.strftime('%b %d') }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <form action="/tasks/{{ task.id }}/complete" method="post">
+                            <button type="submit" class="btn btn-small btn-complete">✓</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <p class="empty-window">No tasks scheduled in this window</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="empty-state">
+        <h3>No Energy Windows Defined</h3>
+        <p>Before we can schedule your tasks, you need to define your energy windows.</p>
+        <a href="/energy" class="btn btn-primary">Add Energy Windows</a>
+    </div>
+    {% endif %}
+</div>
+
+{% if unassigned_tasks %}
+<div class="unassigned-section">
+    <h2>Unscheduled Tasks</h2>
+    <p class="help-text">These tasks are waiting for an appropriate energy window</p>
+    
+    <div class="task-cards">
+        {% for task in unassigned_tasks %}
+        <div class="task-card unassigned effort-{{ task.effort_level }}">
+            <div class="task-header">
+                <h3>{{ task.title }}</h3>
+                <span class="effort-badge effort-{{ task.effort_level }}">
+                    {% if task.effort_level == 'high' %}🔴 High
+                    {% elif task.effort_level == 'medium' %}🟡 Medium
+                    {% else %}🟢 Low{% endif %}
+                </span>
+            </div>
+            
+            {% if task.description %}
+            <p class="task-description">{{ task.description }}</p>
+            {% endif %}
+            
+            <div class="task-meta">
+                {% if task.estimated_duration %}
+                <span>⏱️ {{ task.estimated_duration }} min</span>
+                {% endif %}
+                {% if task.deadline %}
+                <span>📅 Due: {{ task.deadline.strftime('%b %d, %Y') }}</span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="info-box">
+        <h3>💡 Why are tasks unscheduled?</h3>
+        <ul>
+            <li>You might need more energy windows with matching energy levels</li>
+            <li>Your current windows might not have enough available time</li>
+            <li>Consider adjusting task durations or adding more flexible windows</li>
+        </ul>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
