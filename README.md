@@ -1,6 +1,6 @@
 # TaskRhythm
 
-TaskRhythm is a human-centered productivity web application that helps students schedule academic tasks based on their natural energy levels instead of rigid time blocks, reducing burnout and guilt while improving productivity.
+TaskRhythm is a human-centered productivity web application that helps students schedule academic tasks based on their natural energy levels rather than rigid time blocks. By aligning work with energy rhythms, TaskRhythm aims to reduce burnout and guilt while supporting sustainable productivity.
 
 ## 🌟 Features
 
