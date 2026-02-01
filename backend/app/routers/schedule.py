@@ -4,8 +4,9 @@ Schedule routes for task assignment and viewing.
 Handles schedule generation and display.
 """
 
+import logging
 from fastapi import APIRouter, Depends, HTTPException, status, Request
-from fastapi.responses import RedirectResponse, HTMLResponse
+from fastapi.responses import RedirectResponse, HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from pathlib import Path
@@ -16,6 +17,7 @@ from ..models import Task, EnergyWindow
 from ..scheduler import schedule_tasks, clear_schedule
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 # Setup templates
 BASE_DIR = Path(__file__).parent.parent.parent
@@ -126,16 +128,37 @@ async def generate_schedule(
         # Run scheduling algorithm
         result = schedule_tasks(user_id, db)
         
-        # Redirect to schedule view with success message
-        return RedirectResponse(
-            url=f"/schedule?success={result['message']}",
-            status_code=status.HTTP_303_SEE_OTHER
+        logger.info(
+            f"Schedule generated for user {user_id}: "
+            f"{result['assigned_count']} scheduled, {result['unassigned_count']} unscheduled"
         )
         
+        json_data = {
+            "success": result["success"],
+            "scheduled_count": result["assigned_count"],
+            "unscheduled_count": result["unassigned_count"],
+            "message": result["message"]
+        }
+        # Browser form expects redirect; API/tests expect JSON
+        accept = request.headers.get("accept", "")
+        if "text/html" in accept:
+            return RedirectResponse(
+                url=f"/schedule?success={result['message']}",
+                status_code=status.HTTP_303_SEE_OTHER
+            )
+        return JSONResponse(content=json_data)
+        
     except Exception as e:
-        return RedirectResponse(
-            url="/schedule?error=Failed to generate schedule",
-            status_code=status.HTTP_303_SEE_OTHER
+        logger.exception(f"Failed to generate schedule for user {user_id}")
+        accept = request.headers.get("accept", "")
+        if "text/html" in accept:
+            return RedirectResponse(
+                url="/schedule?error=Failed to generate schedule",
+                status_code=status.HTTP_303_SEE_OTHER
+            )
+        return JSONResponse(
+            content={"error": "Failed to generate schedule"},
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
 
@@ -155,15 +178,26 @@ async def clear_user_schedule(
         # Clear schedule
         clear_schedule(user_id, db)
         
-        # Redirect to schedule view
-        return RedirectResponse(
-            url="/schedule?success=Schedule cleared. Tasks are ready to be rescheduled.",
-            status_code=status.HTTP_303_SEE_OTHER
-        )
+        logger.info(f"Schedule cleared for user {user_id}")
+        
+        accept = request.headers.get("accept", "")
+        if "text/html" in accept:
+            return RedirectResponse(
+                url="/schedule?success=Schedule cleared. Tasks are ready to be rescheduled.",
+                status_code=status.HTTP_303_SEE_OTHER
+            )
+        return JSONResponse(content={"message": "Schedule cleared successfully"})
         
     except Exception as e:
-        return RedirectResponse(
-            url="/schedule?error=Failed to clear schedule",
-            status_code=status.HTTP_303_SEE_OTHER
+        logger.exception(f"Failed to clear schedule for user {user_id}")
+        accept = request.headers.get("accept", "")
+        if "text/html" in accept:
+            return RedirectResponse(
+                url="/schedule?error=Failed to clear schedule",
+                status_code=status.HTTP_303_SEE_OTHER
+            )
+        return JSONResponse(
+            content={"error": "Failed to clear schedule"},
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 

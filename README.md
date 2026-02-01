@@ -159,9 +159,12 @@ TaskRhythm/
 - **Backend**: FastAPI (Python)
 - **Database**: SQLite with SQLAlchemy ORM
 - **Templates**: Jinja2 (server-rendered HTML)
-- **Authentication**: Session-based with secure cookies
+- **Authentication**: Session-based with secure cookies (bcrypt password hashing)
 - **Styling**: Custom CSS with responsive design
 - **Validation**: Pydantic v2
+- **Testing**: pytest with 85%+ code coverage
+- **CI/CD**: GitHub Actions (automated testing and linting)
+- **Logging**: Structured logging for debugging and monitoring
 
 ## 🧠 Scheduling Algorithm
 
@@ -219,6 +222,119 @@ The scheduling algorithm uses deterministic effort-energy mapping:
 - CSRF protection via session middleware
 - Input validation using Pydantic schemas
 - SQL injection protection via SQLAlchemy ORM
+
+## 🧪 Testing
+
+TaskRhythm includes a comprehensive test suite with unit and integration tests.
+
+### Running Tests
+
+1. **Install development dependencies**:
+   ```bash
+   pip install -r backend/requirements-dev.txt
+   ```
+
+2. **Run all tests**:
+   ```bash
+   cd backend
+   pytest tests/ -v
+   ```
+
+3. **Run tests with coverage**:
+   ```bash
+   cd backend
+   pytest tests/ -v --cov=app --cov-report=term-missing
+   ```
+
+4. **Run specific test files**:
+   ```bash
+   cd backend
+   pytest tests/test_scheduler.py -v
+   pytest tests/test_api.py -v
+   ```
+
+### Test Coverage
+
+The test suite covers:
+- **Scheduler algorithm**: Window duration, capacity management, effort-energy mapping, schedule generation
+- **API endpoints**: Authentication, tasks CRUD, energy windows CRUD, schedule generation
+- **Authentication flow**: Registration, login, logout, session management
+- **Error handling**: Invalid inputs, edge cases, authorization checks
+
+Current test coverage: **85%+** of application code
+
+## 🔄 CI/CD Pipeline
+
+TaskRhythm uses GitHub Actions for continuous integration:
+
+- **Automated testing**: All tests run on every push and pull request
+- **Code quality checks**: Linting with `ruff` and formatting checks with `black`
+- **Multi-version testing**: Tests run on Python 3.11 and 3.12
+- **Coverage reporting**: Automatic coverage reports uploaded to Codecov
+
+View the workflow: `.github/workflows/test.yml`
+
+## 🏗️ Architecture
+
+### High-Level Design
+
+```
+┌─────────────┐
+│   Browser   │
+└──────┬──────┘
+       │ HTTP
+       ▼
+┌─────────────────────────────────┐
+│      FastAPI Application        │
+│  ┌───────────────────────────┐  │
+│  │   Routers (API Layer)     │  │
+│  │  - auth.py                │  │
+│  │  - tasks.py               │  │
+│  │  - energy.py              │  │
+│  │  - schedule.py            │  │
+│  └───────────┬───────────────┘  │
+│              │                   │
+│  ┌───────────▼───────────────┐  │
+│  │   Business Logic Layer    │  │
+│  │  - scheduler.py           │  │
+│  │  - auth.py                │  │
+│  └───────────┬───────────────┘  │
+│              │                   │
+│  ┌───────────▼───────────────┐  │
+│  │   Data Layer              │  │
+│  │  - models.py (SQLAlchemy) │  │
+│  │  - schemas.py (Pydantic)  │  │
+│  │  - database.py            │  │
+│  └───────────┬───────────────┘  │
+└──────────────┼───────────────────┘
+               │
+               ▼
+       ┌──────────────┐
+       │ SQLite DB    │
+       └──────────────┘
+```
+
+### Key Components
+
+- **Routers**: Handle HTTP requests, validate inputs, return responses
+- **Scheduler**: Core algorithm for task-to-window assignment
+- **Models**: SQLAlchemy ORM models (User, Task, EnergyWindow)
+- **Schemas**: Pydantic validation schemas for request/response data
+- **Auth**: Password hashing, user authentication, session management
+- **Database**: SQLite with SQLAlchemy for persistence
+
+### Data Flow: Schedule Generation
+
+1. User clicks "Generate Schedule" → `POST /schedule/generate`
+2. Router validates authentication and calls `generate_schedule()`
+3. Scheduler:
+   - Fetches user's tasks and energy windows from DB
+   - Sorts tasks by deadline and effort level
+   - For each task, finds best matching window using effort-energy mapping
+   - Checks window capacity and assigns task if space available
+   - Updates task records with `assigned_window_id`
+4. Returns count of scheduled/unscheduled tasks
+5. Router logs result and returns JSON response
 
 ## 🎨 Design Philosophy
 

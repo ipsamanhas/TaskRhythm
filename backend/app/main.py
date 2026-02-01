@@ -5,6 +5,7 @@ A human-centered productivity web application that schedules academic tasks
 based on natural energy levels instead of rigid time blocks.
 """
 
+import logging
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -15,6 +16,14 @@ import secrets
 
 from .database import init_db
 from .routers import auth, energy, tasks, schedule
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S"
+)
+logger = logging.getLogger(__name__)
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -44,8 +53,8 @@ app.include_router(schedule.router, prefix="/schedule", tags=["Schedule"])
 async def startup_event():
     """Initialize database on application startup."""
     init_db()
-    print("✓ Database initialized")
-    print("✓ TaskRhythm is ready")
+    logger.info("Database initialized successfully")
+    logger.info("TaskRhythm application started and ready")
 
 
 @app.get("/", response_class=HTMLResponse)

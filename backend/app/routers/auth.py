@@ -4,6 +4,7 @@ Authentication routes for login, logout, and registration.
 Handles user authentication using session-based cookies.
 """
 
+import logging
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Form
 from fastapi.responses import RedirectResponse, JSONResponse
 from sqlalchemy.orm import Session
@@ -13,6 +14,7 @@ from ..auth import create_user, authenticate_user, get_current_user
 from ..schemas import UserCreate, UserLogin, UserResponse
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.post("/register")
@@ -44,16 +46,20 @@ async def register(
         request.session["user_id"] = user.id
         request.session["username"] = user.username
         
+        logger.info(f"New user registered: {username} (ID: {user.id})")
+        
         # Redirect to dashboard
         return RedirectResponse(url="/dashboard", status_code=status.HTTP_303_SEE_OTHER)
         
     except HTTPException as e:
+        logger.warning(f"Registration failed for {username}: {e.detail}")
         # Return to registration page with error
         return RedirectResponse(
             url=f"/register?error={e.detail}",
             status_code=status.HTTP_303_SEE_OTHER
         )
     except Exception as e:
+        logger.exception(f"Registration error for {username}")
         return RedirectResponse(
             url=f"/register?error=Registration failed. Please try again.",
             status_code=status.HTTP_303_SEE_OTHER
@@ -76,6 +82,7 @@ async def login(
     user = authenticate_user(db, username, password)
     
     if not user:
+        logger.warning(f"Failed login attempt for username: {username}")
         # Return to login page with error
         return RedirectResponse(
             url="/?error=Invalid username or password",
@@ -85,6 +92,8 @@ async def login(
     # Create session
     request.session["user_id"] = user.id
     request.session["username"] = user.username
+    
+    logger.info(f"User logged in: {username} (ID: {user.id})")
     
     # Redirect to dashboard
     return RedirectResponse(url="/dashboard", status_code=status.HTTP_303_SEE_OTHER)
@@ -98,8 +107,14 @@ async def logout(request: Request):
     
     Clears the session and redirects to home page.
     """
+    user_id = request.session.get("user_id")
+    username = request.session.get("username")
+    
     # Clear session
     request.session.clear()
+    
+    if user_id:
+        logger.info(f"User logged out: {username} (ID: {user_id})")
     
     # Redirect to home page
     return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)

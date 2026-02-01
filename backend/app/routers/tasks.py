@@ -4,6 +4,7 @@ Tasks CRUD routes.
 Handles creation, reading, updating, and deletion of academic tasks.
 """
 
+import logging
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Form
 from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -17,6 +18,7 @@ from ..models import Task
 from ..schemas import TaskCreate, TaskUpdate, TaskResponse
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 # Setup templates
 BASE_DIR = Path(__file__).parent.parent.parent
@@ -133,14 +135,18 @@ async def create_task(
         db.add(task)
         db.commit()
         
+        logger.info(f"Task created: '{title}' (effort: {effort_level}) for user {user_id}")
+        
         return RedirectResponse(url="/tasks", status_code=status.HTTP_303_SEE_OTHER)
         
     except ValueError as e:
+        logger.warning(f"Invalid date format for task creation by user {user_id}: {e}")
         return RedirectResponse(
             url="/tasks?error=Invalid date format",
             status_code=status.HTTP_303_SEE_OTHER
         )
     except Exception as e:
+        logger.exception(f"Failed to create task for user {user_id}")
         return RedirectResponse(
             url="/tasks?error=Failed to create task",
             status_code=status.HTTP_303_SEE_OTHER
@@ -176,6 +182,8 @@ async def toggle_task_completion(
     task.is_completed = not task.is_completed
     db.commit()
     
+    logger.info(f"Task {task_id} completion toggled to {task.is_completed} by user {user_id}")
+    
     return RedirectResponse(url="/tasks", status_code=status.HTTP_303_SEE_OTHER)
 
 
@@ -207,6 +215,8 @@ async def delete_task(
     # Delete task
     db.delete(task)
     db.commit()
+    
+    logger.info(f"Task {task_id} deleted by user {user_id}")
     
     return RedirectResponse(url="/tasks", status_code=status.HTTP_303_SEE_OTHER)
 

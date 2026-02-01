@@ -4,6 +4,7 @@ Energy windows CRUD routes.
 Handles creation, reading, updating, and deletion of energy windows.
 """
 
+import logging
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Form
 from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -16,6 +17,7 @@ from ..models import EnergyWindow
 from ..schemas import EnergyWindowCreate, EnergyWindowUpdate, EnergyWindowResponse
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 # Setup templates
 BASE_DIR = Path(__file__).parent.parent.parent
@@ -129,14 +131,21 @@ async def create_energy_window(
         db.add(window)
         db.commit()
         
+        logger.info(
+            f"Energy window created: {day_of_week} {time_start}-{time_end} "
+            f"({energy_level}) for user {user_id}"
+        )
+        
         return RedirectResponse(url="/energy", status_code=status.HTTP_303_SEE_OTHER)
         
     except ValueError as e:
+        logger.warning(f"Invalid time format for energy window creation by user {user_id}: {e}")
         return RedirectResponse(
             url="/energy?error=Invalid time format",
             status_code=status.HTTP_303_SEE_OTHER
         )
     except Exception as e:
+        logger.exception(f"Failed to create energy window for user {user_id}")
         return RedirectResponse(
             url="/energy?error=Failed to create energy window",
             status_code=status.HTTP_303_SEE_OTHER
@@ -171,6 +180,8 @@ async def delete_energy_window(
     # Delete window
     db.delete(window)
     db.commit()
+    
+    logger.info(f"Energy window {window_id} deleted by user {user_id}")
     
     return RedirectResponse(url="/energy", status_code=status.HTTP_303_SEE_OTHER)
 
