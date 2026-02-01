@@ -1,15 +1,13 @@
 # TaskRhythm
 
-> Work with your energy, not against it
-
-TaskRhythm is a human-centered productivity web application that helps students schedule academic tasks based on their natural energy levels instead of rigid time blocks, reducing burnout and guilt while improving productivity.
+TaskRhythm is a human-centered productivity web application that helps students schedule academic tasks based on their natural energy levels rather than rigid time blocks. By aligning work with energy rhythms, TaskRhythm aims to reduce burnout and guilt while supporting sustainable productivity.
 
 ## 🌟 Features
 
 - **Energy-Based Scheduling**: Define your daily energy windows (high, medium, low) to match your natural rhythm
 - **Smart Task Assignment**: Automatically assigns tasks to appropriate energy windows using deterministic logic
 - **Compassionate Design**: Guilt-free, non-judgmental interface with supportive messaging
-- **No Tracking**: No surveillance or productivity metrics—just support for your natural patterns
+- **Privacy-First Design**: No surveillance, productivity scoring, or behavioral analytics—only the data required to generate schedules
 - **Academic Focus**: Built specifically for students managing coursework and deadlines
 
 ## 🎯 Core Concept
@@ -21,58 +19,6 @@ Instead of forcing yourself to work on demanding tasks when your energy is low, 
 3. **Automatically matches tasks to windows** - High-effort tasks go to high-energy windows
 4. **Prioritizes your wellbeing** - Flexible, compassionate, and judgment-free
 
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Python 3.11 or higher
-- pip (Python package manager)
-
-### Installation
-
-1. **Clone or download the project**
-
-```bash
-cd TaskRhythm
-```
-
-2. **Create a virtual environment** (recommended)
-
-```bash
-python -m venv venv
-
-# On macOS/Linux:
-source venv/bin/activate
-
-# On Windows:
-venv\Scripts\activate
-```
-
-3. **Install dependencies**
-
-```bash
-cd backend
-pip install -r requirements.txt
-```
-
-### Running the Application
-
-1. **Start the FastAPI server**
-
-```bash
-# From the backend directory
-uvicorn app.main:app --reload
-```
-
-2. **Open your browser**
-
-Navigate to: `http://localhost:8000`
-
-3. **Create an account**
-
-- Click "Register here" on the landing page
-- Enter your username, email, and password
-- You'll be automatically logged in
 
 ## 📖 How to Use
 
@@ -119,40 +65,6 @@ Navigate to: `http://localhost:8000`
 - Mark tasks as complete when done
 - Add new tasks and regenerate the schedule as needed
 
-## 🏗️ Project Structure
-
-```
-TaskRhythm/
-├── backend/
-│   ├── app/
-│   │   ├── main.py              # FastAPI application entry point
-│   │   ├── database.py          # Database configuration
-│   │   ├── models.py            # SQLAlchemy models
-│   │   ├── schemas.py           # Pydantic validation schemas
-│   │   ├── auth.py              # Authentication utilities
-│   │   ├── scheduler.py         # Core scheduling algorithm
-│   │   └── routers/             # API route handlers
-│   │       ├── auth.py          # Authentication routes
-│   │       ├── energy.py        # Energy windows CRUD
-│   │       ├── tasks.py         # Tasks CRUD
-│   │       └── schedule.py      # Schedule generation
-│   ├── templates/               # Jinja2 HTML templates
-│   │   ├── base.html
-│   │   ├── index.html
-│   │   ├── register.html
-│   │   ├── dashboard.html
-│   │   ├── energy_windows.html
-│   │   ├── tasks.html
-│   │   └── schedule.html
-│   ├── static/                  # Static assets
-│   │   ├── css/
-│   │   │   └── styles.css
-│   │   └── js/
-│   │       └── main.js
-│   └── requirements.txt
-├── taskrhythm.db                # SQLite database (created on first run)
-└── README.md
-```
 
 ## 🔧 Technical Stack
 
@@ -366,20 +278,4 @@ Potential features for future versions:
 - Multi-week view
 - Task notes and attachments
 - Study break reminders
-
-## 🤝 Contributing
-
-This is an MVP built for educational purposes. Contributions, suggestions, and feedback are welcome!
-
-## 📄 License
-
-This project is open source and available for educational and personal use.
-
-## 🙏 Acknowledgments
-
-Built with care for students who are tired of productivity systems that make them feel guilty for being human.
-
----
-
-**Remember**: Your energy ebbs and flows. That's natural. TaskRhythm helps you work *with* that rhythm, not against it. 💙
 
